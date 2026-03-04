@@ -42,42 +42,41 @@ Aardwolf Vorpal Tracker – Elegant Edition v2.0 loaded.
 
 Commands
 
-vorpalhelp    (shows the command list)
+**vorpalhelp**    (shows the command list)
 
 ### Stats
 
-vorpalstats		(displays session, daily, and lifetime totals)
+**vorpalstats**		(displays session, daily, and lifetime totals)
 
-vorpalreset		(gives a reset warning)
-vorpalreset confirm	(resets all counters)
+**vorpalreset**		(gives a reset warning)
+**vorpalreset confirm**	(resets all counters)
 
 ---
 
 ### Channel Control
 
-vorpalchan		(shows current report channel and active/mute status)
+**vorpalchan**		(shows current report channel and active/mute status)
 
-vorpalchan CHANNEL	(sets report channel. e.g. vorpalchan gt, vorpalchan echo)
+**vorpalchan CHANNEL**	(sets report channel. e.g. vorpalchan gt, vorpalchan echo)
 
-vorpalchan mute		(mutes reporting but does not stop the vorpal tracking)
+**vorpalchan mute**		(mutes reporting but does not stop the vorpal tracking)
 
-vorpalchan unmute	(resumes reporting)
+**vorpalchan unmute**	(resumes reporting)
 
 
 ---
 
 ### Message Modes
 
-```
-vorpalmessage		(shows current message mode and preview)
+**vorpalmessage**		(shows current message mode and preview)
 
-vorpalmessage default	(sets the vorpal message to the default Duffle bag message) (classic mode).
+**vorpalmessage default**	(sets the vorpal message to the default Duffle bag message) (classic mode).
 
-vorpalmessage brief	(sets the vorpal message to a short, clean message)
+**vorpalmessage brief**	(sets the vorpal message to a short, clean message)
 
-vorpalmessage new	(shows custom message help)
+**vorpalmessage new**	(shows custom message help)
 
-vorpalmessage new TEXT	(sets a custom message)
+**vorpalmessage new TEXT**	(sets a custom message)
 
 ### Custom Placeholders
 
@@ -92,7 +91,9 @@ You can use one, two or all three of these placeholders and in any order.
 Example:
 
 vorpalmessage new just claimed another head! That's {today} today and {lifetime} total...
+
 will set you message to look like...
+
 Player just claimed another head!  That's 36 today and 146 total...
 
 Numbers automatically use the plugin's colour scheme.
@@ -100,15 +101,15 @@ Numbers automatically use the plugin's colour scheme.
 ---
 
 
-vorpaltest		(displays exactly how your message will look without increasing totals)
+**vorpaltest**		(displays exactly how your message will look without increasing totals)
 
 ---
 
 ### Manual Adjustment (Advanced)
 
-setsessionvorpals #
-settodayvorpals #
-setlifetimevorpals #
+**setsessionvorpals** #
+**settodayvorpals** #
+**setlifetimevorpals** #
 
 
 Intended for correction or migration purposes.
