@@ -1,0 +1,380 @@
+<muclient>
+<!--
+Aardwolf Vorpal Tracker – Elegant Edition
+Version: 2.0
+Author: Gaindal
+
+Features:
+- Tracks session, daily, and lifetime vorpals
+- Configurable output channel
+- Mute support
+- Default, brief, and custom message modes
+- Colour-aware placeholders
+- Preview command (vorpaltest)
+- Hidden manual setters
+
+Commands:
+Type: vorpalhelp
+-->
+
+<plugin name="aardwolf_vorpal_tracker"
+        author="Gaindal with lots of AI help"
+        id="a1b2c3d4e5f6a7b8c9d0e1f2"
+        language="Lua"
+        purpose="Elegant Vorpal tracker"
+        save_state="y"
+        requires="4.94"
+        version="2.0"/>
+
+<script>
+
+-- =========================================
+-- VERSION
+-- =========================================
+
+VORPAL_VERSION = "2.0"
+
+-- =========================================
+-- GLOBAL STATE
+-- =========================================
+
+VORPAL_CHANNEL = GetVariable("vorpal_channel")
+if not VORPAL_CHANNEL or VORPAL_CHANNEL == "" then
+  VORPAL_CHANNEL = "spo"
+end
+
+VORPAL_MUTED = (GetVariable("vorpal_muted") == "true")
+
+VORPAL_MESSAGE_MODE = GetVariable("vorpal_message_mode") or "default"
+VORPAL_MESSAGE_CUSTOM = GetVariable("vorpal_message_custom") or ""
+
+lifetime_vorpals = tonumber(GetVariable("lifetime_vorpals")) or 0
+today_vorpals = tonumber(GetVariable("today_vorpals")) or 0
+session_vorpals = 0
+
+-- Daily reset
+local saved_date = GetVariable("vorpal_date")
+if not saved_date or saved_date ~= os.date("%Y%m%d") then
+  today_vorpals = 0
+  SetVariable("today_vorpals", 0)
+  SetVariable("vorpal_date", os.date("%Y%m%d"))
+end
+
+-- =========================================
+-- PERSISTENCE
+-- =========================================
+
+function save_vorpal_totals()
+  SetVariable("lifetime_vorpals", lifetime_vorpals)
+  SetVariable("today_vorpals", today_vorpals)
+end
+
+-- =========================================
+-- MESSAGE BUILDER
+-- =========================================
+
+function build_vorpal_message()
+
+  if VORPAL_MESSAGE_MODE == "brief" then
+    return "got another vorpal (@x214" ..
+           today_vorpals .. "@x208 today / @x207" ..
+           lifetime_vorpals .. "@x208 total)."
+  end
+
+  if VORPAL_MESSAGE_MODE == "custom" and VORPAL_MESSAGE_CUSTOM ~= "" then
+    local msg = VORPAL_MESSAGE_CUSTOM
+
+    msg = msg:gsub("{session}", "@x226" .. session_vorpals .. "@x208")
+    msg = msg:gsub("{today}", "@x214" .. today_vorpals .. "@x208")
+    msg = msg:gsub("{lifetime}", "@x207" .. lifetime_vorpals .. "@x208")
+
+    return msg
+  end
+
+  -- Default duffle bag message
+  local head_word = (session_vorpals == 1) and "head" or "heads"
+
+  return "has just claimed another head! This brings their total for this session to @x226" ..
+         session_vorpals .. " " .. head_word ..
+         "@x208 and the total number of heads in their duffle bag to @x207" ..
+         lifetime_vorpals .. "@x208."
+end
+
+-- =========================================
+-- OUTPUT
+-- =========================================
+
+function send_vorpal_message(msg)
+  if VORPAL_MUTED then return end
+  ColourNote("@x208", "", msg)
+  Send(VORPAL_CHANNEL .. " :@x208" .. msg .. "@w")
+end
+
+-- =========================================
+-- CORE TRACKING
+-- =========================================
+
+function add_vorpal()
+  session_vorpals = session_vorpals + 1
+  today_vorpals = today_vorpals + 1
+  lifetime_vorpals = lifetime_vorpals + 1
+
+  save_vorpal_totals()
+
+  local msg = build_vorpal_message()
+  send_vorpal_message(msg)
+end
+
+-- =========================================
+-- REPORTING
+-- =========================================
+
+function report_vorpals()
+
+  local report = "=== Vorpal Statistics === " ..
+                 "(Session) @x226" .. session_vorpals .. "@x208 | " ..
+                 "(Today) @x214" .. today_vorpals .. "@x208 | " ..
+                 "(Lifetime) @x207" .. lifetime_vorpals
+
+  ColourNote("@x208","", report)
+
+  if not VORPAL_MUTED then
+    Send(VORPAL_CHANNEL .. " :" .. report .. "@w")
+  end
+end
+
+function test_vorpal_message()
+
+  local preview = build_vorpal_message()
+
+  ColourNote("@x226","", "=== Vorpal Message Preview ===")
+  ColourNote("@x208","", preview)
+
+  if not VORPAL_MUTED then
+    Send(VORPAL_CHANNEL .. " :@x208" .. preview .. "@w")
+  end
+
+end
+
+
+-- =========================================
+-- RESET
+-- =========================================
+
+function reset_vorpals(confirm)
+  if confirm ~= "confirm" then
+    ColourNote("@x196","", "Type: vorpalreset confirm (to reset statistics)")
+    return
+  end
+
+  session_vorpals = 0
+  today_vorpals = 0
+  lifetime_vorpals = 0
+
+  save_vorpal_totals()
+
+  ColourNote("@x208","@x196","All vorpal statistics reset.")
+end
+
+-- =========================================
+-- CHANNEL CONTROL
+-- =========================================
+
+function set_vorpal_channel(arg)
+  if not arg or arg == "" then
+    local status = VORPAL_MUTED and "Muted" or "Active"
+    ColourNote("@x208","", "Vorpal tracker channel: " .. VORPAL_CHANNEL .. " | Status: " .. status)
+    return
+  end
+
+  arg = string.lower(arg)
+
+  if arg == "mute" then
+    VORPAL_MUTED = true
+    SetVariable("vorpal_muted","true")
+    ColourNote("@x226","@x196","Vorpal tracker muted.")
+    return
+  end
+
+  if arg == "unmute" then
+    VORPAL_MUTED = false
+    SetVariable("vorpal_muted","false")
+    ColourNote("@x226","@x214","Vorpal tracker unmuted.")
+    return
+  end
+
+  VORPAL_CHANNEL = arg
+  SetVariable("vorpal_channel", VORPAL_CHANNEL)
+  ColourNote("@x226","@x214","Vorpal tracker channel set to: " .. VORPAL_CHANNEL)
+end
+
+-- =========================================
+-- MESSAGE CONFIGURATION
+-- =========================================
+
+function set_vorpal_message(arg)
+
+  if not arg or arg == "" then
+    ColourNote("@x226","", "Current vorpal message mode: @x214" .. VORPAL_MESSAGE_MODE)
+
+    local preview = build_vorpal_message()
+    ColourNote("@x208","", "Preview:")
+    ColourNote("@x208","", preview)
+    return
+  end
+
+  if arg == "default" then
+    VORPAL_MESSAGE_MODE = "default"
+    SetVariable("vorpal_message_mode", "default")
+    ColourNote("@x226","@x214","Vorpal message set to default.")
+    return
+  end
+
+  if arg == "brief" then
+    VORPAL_MESSAGE_MODE = "brief"
+    SetVariable("vorpal_message_mode", "brief")
+    ColourNote("@x226","@x214","Vorpal message set to brief.")
+    return
+  end
+
+  if arg == "new" then
+    ColourNote("@x226","", "Usage:")
+    ColourNote("@x208","", "vorpalmessage new TEXT")
+    ColourNote("@x208","", "Placeholders: {session} {today} {lifetime}")
+    ColourNote("@x208","", "Example:")
+    ColourNote("@x208","", "vorpalmessage new just scored another! ({today} today / {lifetime} total)")
+    return
+  end
+
+  if arg:sub(1,4) == "new " then
+    local custom = arg:sub(5)
+
+    VORPAL_MESSAGE_MODE = "custom"
+    VORPAL_MESSAGE_CUSTOM = custom
+
+    SetVariable("vorpal_message_mode", "custom")
+    SetVariable("vorpal_message_custom", custom)
+
+    ColourNote("@x226","@x214","Custom vorpal message set.")
+    return
+  end
+
+  ColourNote("@x196","", "Invalid option. Type 'vorpalmessage' for help.")
+end
+-- =========================================
+-- HIDDEN MANUAL SETTERS
+-- =========================================
+
+function set_session_vorpals(val)
+  session_vorpals = tonumber(val) or session_vorpals
+  ColourNote("@x226","@x214","Session vorpals manually set to: " .. session_vorpals)
+end
+
+function set_today_vorpals(val)
+  today_vorpals = tonumber(val) or today_vorpals
+  SetVariable("today_vorpals", today_vorpals)
+  ColourNote("@x226","@x214","Daily vorpals manually set to: " .. today_vorpals)
+end
+
+function set_lifetime_vorpals(val)
+  lifetime_vorpals = tonumber(val) or lifetime_vorpals
+  SetVariable("lifetime_vorpals", lifetime_vorpals)
+  ColourNote("@x226","@x214","Lifetime vorpals manually set to: " .. lifetime_vorpals)
+end
+
+function show_vorpal_help()
+
+  ColourNote("@x226","", "=== Vorpal Tracker v" .. VORPAL_VERSION .. " ===")
+
+  ColourNote("@x208","", "vorpalstats              - show current statistics")
+  ColourNote("@x208","", "vorpalreset              - reset statistics (confirmation required)")
+  ColourNote("@x208","", "vorpalreset confirm      - confirm reset")
+
+  ColourNote("@x208","", "")
+  ColourNote("@x208","", "vorpalchan               - show channel and mute status")
+  ColourNote("@x208","", "vorpalchan CHANNEL       - change report channel")
+  ColourNote("@x208","", "vorpalchan mute          - mute reporting")
+  ColourNote("@x208","", "vorpalchan unmute        - unmute reporting")
+
+  ColourNote("@x208","", "")
+  ColourNote("@x208","", "vorpalmessage            - show current mode + preview")
+  ColourNote("@x208","", "vorpalmessage default    - duffle bag message")
+  ColourNote("@x208","", "vorpalmessage brief      - clean short message")
+  ColourNote("@x208","", "vorpalmessage new        - custom message help")
+  ColourNote("@x208","", "vorpalmessage new TEXT   - set custom message")
+  ColourNote("@x208","", "vorpaltest               - preview current message")
+
+  ColourNote("@x208","", "")
+  ColourNote("@x214","", "Hidden setters:")
+  ColourNote("@x208","", "setsessionvorpals #")
+  ColourNote("@x208","", "settodayvorpals #")
+  ColourNote("@x208","", "setlifetimevorpals #")
+
+  ColourNote("@x208","", "")
+  ColourNote("@x244","", "Made with excessive elegance by Gaindal.")
+
+end
+
+-- =========================================
+-- STARTUP MESSAGE
+-- =========================================
+
+ColourNote("@x226","", "Aardwolf Vorpal Tracker – Elegant Edition v" .. VORPAL_VERSION .. " loaded.")
+</script>
+
+<triggers>
+
+<trigger enabled="y"
+         match="Deep magic stirs within your weapon. It seems to have a life of its own."
+         send_to="12"
+         sequence="100">
+<send>add_vorpal()</send>
+</trigger>
+
+</triggers>
+
+<aliases>
+
+<alias enabled="y" regexp="y" match="^vorpalstats$" send_to="12">
+<send>report_vorpals()</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^vorpalreset$" send_to="12">
+<send>reset_vorpals("")</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^vorpalreset confirm$" send_to="12">
+<send>reset_vorpals("confirm")</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^vorpalchan(?: (.*))?$" send_to="12">
+<send>set_vorpal_channel("%1")</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^vorpalhelp$" send_to="12">
+<send>show_vorpal_help()</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^vorpalmessage(?: (.*))?$" send_to="12">
+<send>set_vorpal_message("%1")</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^vorpaltest$" send_to="12">
+  <send>test_vorpal_message()</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^setsessionvorpals (\d+)$" send_to="12">
+<send>set_session_vorpals("%1")</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^settodayvorpals (\d+)$" send_to="12">
+<send>set_today_vorpals("%1")</send>
+</alias>
+
+<alias enabled="y" regexp="y" match="^setlifetimevorpals (\d+)$" send_to="12">
+<send>set_lifetime_vorpals("%1")</send>
+</alias>
+
+</aliases>
+
+</muclient>
