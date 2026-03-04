@@ -2,7 +2,7 @@
 <!--
 Aardwolf Vorpal Tracker – Elegant Edition
 Version: 2.0
-Author: Gaindal
+Author: Gaindal and Nalani
 
 Features:
 - Tracks session, daily, and lifetime vorpals
@@ -18,7 +18,7 @@ Type: vorpalhelp
 -->
 
 <plugin name="aardwolf_vorpal_tracker"
-        author="Gaindal with lots of AI help"
+        author="Gaindal and Nalani with lots of AI help"
         id="a1b2c3d4e5f6a7b8c9d0e1f2"
         language="Lua"
         purpose="Elegant Vorpal tracker"
