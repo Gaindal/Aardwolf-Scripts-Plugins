@@ -1,7 +1,7 @@
 # Aardwolf Vorpal Tracker – Elegant Edition
 
 **Version 2.0**  
-Author: Gaindal  
+Author: Gaindal and Nalani  
 
 A configurable, colour-aware vorpal tracker plugin for MUSHclient users playing Aardwolf MUD.
 
@@ -133,4 +133,5 @@ If redistributing modified versions, please credit the original author.
 
 ---
 
-Enjoy watching those heads stack up.
+Enjoy watching those heads stack up,
+Gaindal.
