@@ -78,6 +78,8 @@ Commands
 
 **vorpalmessage new TEXT**	(sets a custom message)
 
+**vorpaltest**		(displays exactly how your message will look without increasing totals)
+
 ### Custom Placeholders
 
 Available placeholders for custom messages:
@@ -100,15 +102,12 @@ Numbers automatically use the plugin's colour scheme.
 
 ---
 
-
-**vorpaltest**		(displays exactly how your message will look without increasing totals)
-
----
-
 ### Manual Adjustment (Advanced)
 
 **setsessionvorpals** #
+
 **settodayvorpals** #
+
 **setlifetimevorpals** #
 
 
