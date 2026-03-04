@@ -42,6 +42,8 @@ Aardwolf Vorpal Tracker – Elegant Edition v2.0 loaded.
 
 Commands
 
+vorpalhelp    (shows the command list)
+
 ### Stats
 
 vorpalstats		(displays session, daily, and lifetime totals)
