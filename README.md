@@ -56,8 +56,11 @@ vorpalreset confirm	(resets all counters)
 ### Channel Control
 
 vorpalchan		(shows current report channel and active/mute status)
+
 vorpalchan CHANNEL	(sets report channel. e.g. vorpalchan gt, vorpalchan echo)
+
 vorpalchan mute		(mutes reporting but does not stop the vorpal tracking)
+
 vorpalchan unmute	(resumes reporting)
 
 
