@@ -40,7 +40,7 @@ Aardwolf Vorpal Tracker – Elegant Edition v2.0 loaded.
 
 ---
 
-Commands
+**Commands**
 
 **vorpalhelp**    (shows the command list)
 
